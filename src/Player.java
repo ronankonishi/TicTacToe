@@ -1,13 +1,14 @@
 
-public class Player {
+public class Player implements BoardObject {
 	
 	private String name;
 	private char symbol;
-	private boolean isWinner = false;
+	private boolean winner;
 	
 	public Player (String name, char symbol) {
 		this.name = name;
 		this.symbol = symbol;
+		this.winner = false;
 	}
 	
 	public String getName() {
@@ -19,10 +20,10 @@ public class Player {
 	}
 	
 	public boolean isWinner() {
-		return isWinner;
+		return winner;
 	}
 	
 	public void setWinner(boolean status) {
-		isWinner = status;
+		winner = status;
 	}
 }

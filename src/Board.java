@@ -1,58 +1,52 @@
+import java.util.ArrayList;
+import java.util.List;
 
-public class Board {
+public class Board implements BoardSubject {
 	
-	private Player p1, p2;
-	private char[][] board;
-	private boolean isWinner = false;
-	private int size = 9;
-	private int count = 0;
+	private List<BoardObserver> observers;
+	private BoardObject winner;
+	private boolean playing;
+	
+	private BoardObject[][] board;
+	private int size;
+	private int tileCount;
 	private int length;
-	
-	public Board(Player p1, Player p2, int size) {
-		this.p1 = p1;
-		this.p2 = p2;
-		this.size = size;
-		this.length = (int) Math.sqrt(size);
-		board = new char[this.length][this.length];
-	}
-	
-	public void set(Player player, int[] coordinate) {
-		count++;
-		board[coordinate[0]][coordinate[1]] = player.getSymbol();
-	}
-
-	public boolean isWinner() {
-		return (p1.isWinner() || p2.isWinner());
-	}
-
-	public boolean isFull() {
-		return count == size;
-	}
-
-	public void display() {
-		for (int i = 0; i < length; i++) {
-			for (int j = 0; j < length; j++) {
-				System.out.print(board[j][i]);
-				if (j != length - 1) {
-					System.out.print("|");
-				}
-			}
-			System.out.println("");
-		}
-	}
-
-	public Player printWinner() {
-		if(p1.isWinner()) {
-			return p1;
-		} else if (p2.isWinner()){
-			return p2;
-		}
+	BoardObject bo1, bo2;
 		
-		return null;
+	public Board(BoardObject bo1, BoardObject bo2) {
+		this.bo1 = bo1;
+		this.bo2 = bo2;
+		this.tileCount = 0;
+		this.size = 9;
+		this.length = (int) Math.sqrt(size);
+		observers = new ArrayList<BoardObserver>();
+		playing = true;
 	}
 	
-	public void setWinner() {
-		char firstValue = '\0';
+	public BoardObject getWinner() {
+		return winner;
+	}
+	
+	public void createBoard() {
+		board = new BoardObject[this.length][this.length];
+	}
+	
+	public boolean tie() {
+		if (tileCount == size) {
+			return true;
+		}
+		return false;
+	}
+	
+	public void set(BoardObject bo, Coordinate cord) {
+		tileCount++;
+		board[cord.getX()][cord.getY()] = bo;
+		
+		notifyObservers();
+	}
+	
+	public void checkForWinner() {
+		BoardObject firstValue = null;
 		boolean isSame = true;
 		
 		// vertical and horizontal checks
@@ -65,7 +59,7 @@ public class Board {
 						} else {
 							firstValue = board[j][i];
 						}
-						if (firstValue == '\0') {
+						if (firstValue == null) {
 							isSame = false;
 							break;
 						}
@@ -79,13 +73,13 @@ public class Board {
 	
 				}
 				if (isSame) {
-					if (p1.getSymbol() == firstValue) {
-						p1.setWinner(true);
-						return;
-					} else {
-						p2.setWinner(true);
+					playing = false;
+					if (bo1 == firstValue) {
+						winner = bo1;
 						return;
 					}
+					winner = bo2;
+					return;
 				}
 				
 				isSame = true;
@@ -101,7 +95,7 @@ public class Board {
 					} else {
 						firstValue = board[i][board.length - 1 - i];
 					}
-					if (firstValue == '\0') {
+					if (firstValue == null) {
 						isSame = false;
 						break;
 					}
@@ -120,14 +114,37 @@ public class Board {
 				}
 			}
 			if (isSame) {
-				if (p1.getSymbol() == firstValue) {
-					p1.setWinner(true);
-					return;
-				} else {
-					p2.setWinner(true);
+				playing = false;
+				if (bo1 == firstValue) {
+					winner = bo1;
 					return;
 				}
+				winner = bo2;
+				return;
 			}
+			
+			isSame = true;
 		}
+	}
+	
+	public boolean isPlaying() {
+		return playing;
+	}
+	
+	@Override
+	public void registerObserver(BoardObserver observer) {
+		observers.add(observer);
+	}
+
+	@Override
+	public void notifyObservers() {
+		for(BoardObserver observer : observers) {
+			observer.boardUpdate();
+		}
+	}
+
+	@Override
+	public void removeObserver(BoardObserver observer) {
+		observers.remove(observer);
 	}
 }

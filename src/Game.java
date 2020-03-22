@@ -1,54 +1,69 @@
-import java.util.Scanner;
-
-public class Game {
+public class Game implements BoardObserver, DisplayObserver {
 	
 	private Player p1, p2;
 	private Board board;
-	private Scanner scan;
-
-	public Game (Scanner scan, String p1Name, char p1Symbol, String p2Name, char p2Symbol) {
-		this.scan = scan;
+	private Display display;
+	private Player playerTurn;
+	
+	public Game (String p1Name, char p1Symbol, String p2Name, char p2Symbol) {
 		p1 = new Player(p1Name, p1Symbol);
-		p2 = new Player(p2Name, p2Symbol);
-		board = new Board(p1, p2, 9);
+		p2 = new Player(p2Name, p2Symbol);	
 		
-		this.play();
-	}
-	
-	private void play() {
-		int[] output;
-		boolean p1turn = true;
-		System.out.println("This is the game board, you must enter a coordinate such that (0,0) is the top left position");
-		while(!board.isWinner() && !board.isFull()) {
-			board.display();
-			if (p1turn) {
-				System.out.println(p1.getName() + ", your turn.");
-				output = this.parseInput(scan.nextLine());
-				board.set(p1, output);
-				p1turn = false;
-			} else {
-				System.out.println(p2.getName() + ", your turn.");
-				output = this.parseInput(scan.nextLine());
-				board.set(p2, output);
-				p1turn = true;
-			}
-			board.setWinner();
-		}
+		playerTurn = p1;
 		
-		if (board.isWinner()) {
-			System.out.println("The winner is " + board.printWinner());
-		} else {
-			System.out.println("Tie game");
-		}
-		
-		
+		board = new Board(p1, p2);
+		display = new Display();
+				
+		board.registerObserver(this);
+		display.registerObserver(this);
 	}
 
-	private int[] parseInput(String input) {
-		int[] output = new int[2];
-		output[0] = input.charAt(1) - '0';
-		output[1] = input.charAt(3) - '0';
-		return output;
+	public void start() {
+		display.init();
+		display.loadHome();
 	}
 	
+	@Override
+	public void displayUpdate() {
+		if (display.getStatus() == DisplayStatus.STARTBUTTONPRESSED) {
+			updateImage();
+			display.loadGame();
+			board.createBoard();
+		} else if (display.getStatus() == DisplayStatus.GAMEBUTTONPRESSED) {
+			board.set(playerTurn, display.getButtonPressed().getCoordinate());
+			board.checkForWinner();
+			if (board.isPlaying()) {
+				if (playerTurn == p1) {
+					playerTurn = p2;
+				} else {
+					playerTurn = p1;
+				}
+				updateImage();
+			} else {
+				if (board.getWinner() == p1) {
+//					display.setWinner("p1");
+				} else if (board.getWinner() == p2) {
+//					display.setWinner("p2");
+				} else {
+//					display.setWinner(null);
+				}
+				display.isPlaying(false);
+				display.gameUpdate();
+			}
+		}
+	}
+
+	private void updateImage() {
+		if (playerTurn == p1) {
+			display.updateImagePath("/img/x.png");
+		} else {
+			display.updateImagePath("/img/o.png");
+		}
+	}
+	
+	@Override
+	public void boardUpdate() {
+		
+		
+	}
 }
