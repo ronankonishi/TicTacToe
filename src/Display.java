@@ -39,7 +39,7 @@ public class Display implements DisplaySubject {
 	
 	private String imgPath;
 	
-	private BoardObject winner;
+	private Player winner;
 	private boolean playing;
 	
 	public Display() {
@@ -51,8 +51,23 @@ public class Display implements DisplaySubject {
 		playing = true;
 	}
 	
-	public void setWinner(BoardObject winner) {
+	public void setWinner(Player winner) {
 		this.winner = winner;
+		displayWinner();
+	}
+	
+	private void displayWinner() {
+		System.out.println("win");
+		JLabel winnerDisplay = null;
+		if (winner == null) {
+			winnerDisplay = new JLabel("Tie");
+		} else {
+			winnerDisplay = new JLabel(winner.getSymbol() + " wins");
+		}
+		winnerDisplay.setFont(new Font("Ariel", Font.PLAIN, 24));
+		
+		frame.add(winnerDisplay);
+		frame.setVisible(true);
 	}
 	
 	public void isPlaying(boolean status) {

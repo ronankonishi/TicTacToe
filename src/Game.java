@@ -41,11 +41,11 @@ public class Game implements BoardObserver, DisplayObserver {
 				updateImage();
 			} else {
 				if (board.getWinner() == p1) {
-//					display.setWinner("p1");
+					display.setWinner(p1);
 				} else if (board.getWinner() == p2) {
-//					display.setWinner("p2");
+					display.setWinner(p2);
 				} else {
-//					display.setWinner(null);
+					display.setWinner(null);
 				}
 				display.isPlaying(false);
 				display.gameUpdate();

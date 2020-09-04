@@ -46,6 +46,11 @@ public class Board implements BoardSubject {
 	}
 	
 	public void checkForWinner() {
+		if (tie()) {
+			playing = false;
+			return;
+		}
+		
 		BoardObject firstValue = null;
 		boolean isSame = true;
 		
